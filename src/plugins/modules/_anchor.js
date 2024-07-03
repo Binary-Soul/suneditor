@@ -13,7 +13,7 @@ export default {
     name: 'anchor',
     add: function (core) {
         core.addModule([selectMenu]);
-        
+
         core.context.anchor = {
             caller: {},
             forms: this.setDialogForm(core),
@@ -48,6 +48,7 @@ export default {
                 '<label>' + lang.dialogBox.linkBox.text + '</label><input class="se-input-form _se_anchor_text" type="text" />' +
             '</div>' +
             '<div class="se-dialog-form-footer">' +
+                '<label><input type="checkbox" class="se-dialog-btn-check _se_anchor_pop_up" />&nbsp;' + window.i18n.common.open_in_pop_up + '</label>' +
                 '<label><input type="checkbox" class="se-dialog-btn-check _se_anchor_check" />&nbsp;' + lang.dialogBox.linkBox.newWindowCheck + '</label>' +
                 '<label><input type="checkbox" class="se-dialog-btn-check _se_anchor_download" />&nbsp;' + lang.dialogBox.linkBox.downloadLinkCheck + '</label>';
             if (relList.length > 0) {
@@ -84,11 +85,13 @@ export default {
         };
 
         if (typeof context.linkDefaultRel.default === 'string') context.linkDefaultRel.default = context.linkDefaultRel.default.trim();
+        if (typeof context.linkDefaultRel.check_pop_up === 'string') context.linkDefaultRel.check_pop_up = context.linkDefaultRel.check_pop_up.trim();
         if (typeof context.linkDefaultRel.check_new_window === 'string') context.linkDefaultRel.check_new_window = context.linkDefaultRel.check_new_window.trim();
         if (typeof context.linkDefaultRel.check_bookmark === 'string') context.linkDefaultRel.check_bookmark = context.linkDefaultRel.check_bookmark.trim();
 
         context.urlInput = forms.querySelector('.se-input-url');
         context.anchorText = forms.querySelector('._se_anchor_text');
+        context.popUpCheck = forms.querySelector('._se_anchor_pop_up');
         context.newWindowCheck = forms.querySelector('._se_anchor_check');
         context.downloadCheck = forms.querySelector('._se_anchor_download');
         context.download = forms.querySelector('._se_anchor_download_icon');
@@ -98,7 +101,7 @@ export default {
 
         this.plugins.selectMenu.initEvent.call(this, pluginName, forms);
         const listContext = this.context.selectMenu.caller[pluginName];
-        
+
         /** rel */
         if (this.options.linkRel.length > 0) {
             context.relButton = forms.querySelector('.se-anchor-rel-btn');
@@ -108,6 +111,7 @@ export default {
             context.relList.addEventListener('click', anchorPlugin.onClick_relList.bind(this, context));
         }
 
+        context.popUpCheck.addEventListener('change', anchorPlugin.onChange_popUpCheck.bind(this, context));
         context.newWindowCheck.addEventListener('change', anchorPlugin.onChange_newWindowCheck.bind(this, context));
         context.downloadCheck.addEventListener('change', anchorPlugin.onChange_downloadCheck.bind(this, context));
         context.anchorText.addEventListener('input', anchorPlugin.onChangeAnchorText.bind(this, context));
@@ -125,12 +129,14 @@ export default {
             anchorPlugin.init.call(this, contextAnchor);
             contextAnchor.anchorText.value = this.getSelection().toString().trim();
             contextAnchor.newWindowCheck.checked = this.options.linkTargetNewWindow;
+            contextAnchor.popUpCheck.checked = this.options.openPopUpLink;
         } else if (contextAnchor.linkAnchor) {
             this.context.dialog.updateModal = true;
             const href = contextAnchor.linkAnchor.getAttribute('href');
             contextAnchor.linkValue = contextAnchor.preview.textContent = contextAnchor.urlInput.value = anchorPlugin.selfPathBookmark.call(this, href) ? href.substr(href.lastIndexOf('#')) : href;
             contextAnchor.anchorText.value = contextAnchor.linkAnchor.textContent;
             contextAnchor.newWindowCheck.checked = (/_blank/i.test(contextAnchor.linkAnchor.target) ? true : false);
+            contextAnchor.popUpCheck.checked = (/true/i.test(contextAnchor.linkAnchor.getAttribute('data-pop-up')) ? true : false);
             contextAnchor.downloadCheck.checked = contextAnchor.linkAnchor.download;
         }
 
@@ -167,7 +173,7 @@ export default {
                 this.modalForm.removeEventListener('click', this.plugins.anchor._closeRelMenu);
                 this.plugins.anchor._closeRelMenu = null;
             }.bind(this, contextAnchor, target);
-    
+
             this.modalForm.addEventListener('click', this.plugins.anchor._closeRelMenu);
         }
     },
@@ -180,7 +186,7 @@ export default {
         const target = e.target;
         const cmd = target.getAttribute('data-command');
         if (!cmd) return;
-        
+
         const current = contextAnchor.currentRel;
         const checked = this.util.toggleClass(target, 'se-checked');
         const index = current.indexOf(cmd);
@@ -271,7 +277,7 @@ export default {
         if (!contextAnchor.anchorText.value.trim() || !contextAnchor._change) {
             contextAnchor.anchorText.value = header.textContent;
         }
-        
+
         this.plugins.anchor.setLinkPreview.call(this, contextAnchor, contextAnchor.urlInput.value);
         this.plugins.selectMenu.close.call(this, this.context.selectMenu.callerContext);
         this.context.anchor.callerContext.urlInput.focus();
@@ -339,7 +345,14 @@ export default {
         // new window
         if (contextAnchor.newWindowCheck.checked) anchor.target = '_blank';
         else anchor.removeAttribute('target');
-        
+
+        // pop-up
+        if (contextAnchor.popUpCheck.checked) {
+            anchor.setAttribute('data-pop-up', 'true');
+        } else {
+            anchor.removeAttribute('data-pop-up');
+        }
+
         // rel
         const rel = contextAnchor.currentRel.join(' ');
         if (!rel) anchor.removeAttribute('rel');
@@ -356,7 +369,7 @@ export default {
 
     createAnchor: function (contextAnchor, notText) {
         if (contextAnchor.linkValue.length === 0) return null;
-        
+
         const url = contextAnchor.linkValue;
         const anchor = contextAnchor.anchorText;
         const displayText = anchor.value.length === 0 ? url : anchor.value;
@@ -399,6 +412,15 @@ export default {
         }
     },
 
+    onChange_popUpCheck: function (contextAnchor, e) {
+        if (typeof contextAnchor.linkDefaultRel.check_pop_up !== 'string') return;
+        if (e.target.checked) {
+            this.plugins.anchor.setRel.call(this, contextAnchor, this.plugins.anchor._relMerge.call(this, contextAnchor, contextAnchor.linkDefaultRel.check_pop_up));
+        } else {
+            this.plugins.anchor.setRel.call(this, contextAnchor, this.plugins.anchor._relDelete.call(this, contextAnchor, contextAnchor.linkDefaultRel.check_pop_up));
+        }
+    },
+
     onChange_downloadCheck: function (contextAnchor, e) {
         if (e.target.checked) {
             contextAnchor.download.style.display = 'block';
@@ -419,7 +441,7 @@ export default {
     _relMerge: function (contextAnchor, relAttr) {
         const current = contextAnchor.currentRel;
         if (!relAttr) return current.join(' ');
-        
+
         if (/^only\:/.test(relAttr)) {
             relAttr = relAttr.replace(/^only\:/, '').trim();
             contextAnchor.currentRel = relAttr.split(' ');
@@ -448,6 +470,7 @@ export default {
         contextAnchor.linkAnchor = null;
         contextAnchor.linkValue = contextAnchor.preview.textContent = contextAnchor.urlInput.value = '';
         contextAnchor.anchorText.value = '';
+        contextAnchor.popUpCheck.checked = false;
         contextAnchor.newWindowCheck.checked = false;
         contextAnchor.downloadCheck.checked = false;
         contextAnchor._change = false;

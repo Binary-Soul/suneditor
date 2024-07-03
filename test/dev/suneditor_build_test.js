@@ -990,6 +990,9 @@ let s2 = window.s2 = suneditor.create(document.getElementById('editor2'), {
 // imageUploadUrl: 'http://localhost:3000/editor/upload',
     // strictMode: false,
     allowedClassNames: '.',
+    attributesWhitelist: {
+        'a': 'href|target|data-pop-up',
+    },
     width: '100%',
     // fontSizeUnit: 'em',
     // mode: "inline",
