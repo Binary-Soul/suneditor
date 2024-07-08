@@ -20,7 +20,7 @@ export default {
             _tableXY: [],
             _maxWidth: true,
             _fixedColumn: false,
-            _showBorder: false,
+            _showBorder: true,
             _rtl: core.options.rtl,
             cellControllerTop: core.options.tableCellControllerPosition === 'top',
             resizeText: null,
@@ -195,6 +195,8 @@ export default {
 
     appendTable: function () {
         const oTable = this.util.createElement('TABLE');
+        oTable.classList.add('se-table-border');
+
         const createCells = this.plugins.table.createCells;
 
         const x = this.context.table._tableXY[0];
