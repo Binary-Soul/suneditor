@@ -20,6 +20,7 @@ export default {
             _tableXY: [],
             _maxWidth: true,
             _fixedColumn: false,
+            _showBorder: false,
             _rtl: core.options.rtl,
             cellControllerTop: core.options.tableCellControllerPosition === 'top',
             resizeText: null,
@@ -68,7 +69,7 @@ export default {
         contextTable.splitButton = resizeDiv.querySelector('._se_table_split_button');
         contextTable.insertRowAboveButton = resizeDiv.querySelector('._se_table_insert_row_a');
         contextTable.insertRowBelowButton = resizeDiv.querySelector('._se_table_insert_row_b');
-        
+
         /** add event listeners */
         tablePicker.addEventListener('mousemove', this.onMouseMove_tablePicker.bind(core, contextTable));
         tablePicker.addEventListener('click', this.appendTable.bind(core));
@@ -109,6 +110,10 @@ export default {
         tableResize.innerHTML = '' +
             '<div>' +
                 '<div class="se-btn-group">' +
+                    '<button type="button" data-command="toggleBorder" class="se-btn se-tooltip _se_table_toggle">' +
+                        '<i class="fas fa-border-none" ></i>' +
+                        '<span class="se-tooltip-inner"><span class="se-tooltip-text">' + window.i18n.common.toggle_table_border + '</span></span>' +
+                    '</button>' +
                     '<button type="button" data-command="resize" class="se-btn se-tooltip _se_table_resize">' +
                         icons.expansion +
                         '<span class="se-tooltip-inner"><span class="se-tooltip-text">' + lang.controller.maxSize + '</span></span>' +
@@ -176,9 +181,9 @@ export default {
                 '<div class="se-btn-group-sub sun-editor-common se-list-layer se-table-split">' +
                     '<div class="se-list-inner">' +
                         '<ul class="se-list-basic">' +
-                            '<li class="se-btn-list" data-command="split" data-value="vertical" style="line-height:32px;" title="' + lang.controller.VerticalSplit + '" aria-label="' + lang.controller.VerticalSplit + '">' + 
+                            '<li class="se-btn-list" data-command="split" data-value="vertical" style="line-height:32px;" title="' + lang.controller.VerticalSplit + '" aria-label="' + lang.controller.VerticalSplit + '">' +
                                 lang.controller.VerticalSplit + '</li>' +
-                            '<li class="se-btn-list" data-command="split" data-value="horizontal" style="line-height:32px;" title="' + lang.controller.HorizontalSplit + '" aria-label="' + lang.controller.HorizontalSplit + '">' + 
+                            '<li class="se-btn-list" data-command="split" data-value="horizontal" style="line-height:32px;" title="' + lang.controller.HorizontalSplit + '" aria-label="' + lang.controller.HorizontalSplit + '">' +
                                 lang.controller.HorizontalSplit + '</li>' +
                         '</ul>' +
                     '</div>' +
@@ -203,7 +208,7 @@ export default {
         oTable.innerHTML = tableHTML;
 
         const changed = this.insertComponent(oTable, false, true, false);
-        
+
         if (changed) {
             const firstTd = oTable.querySelector('td div');
             this.setRange(firstTd, 0, firstTd, 0);
@@ -235,12 +240,12 @@ export default {
         let y = this._w.Math.ceil(e.offsetY / 18);
         x = x < 1 ? 1 : x;
         y = y < 1 ? 1 : y;
-        
+
         if (contextTable._rtl) {
             contextTable.tableHighlight.style.left = (x * 18 - 13) + 'px';
             x = 11 - x;
         }
-        
+
         contextTable.tableHighlight.style.width = x + 'em';
         contextTable.tableHighlight.style.height = y + 'em';
 
@@ -290,6 +295,7 @@ export default {
         contextTable._tableXY = [];
         contextTable._maxWidth = true;
         contextTable._fixedColumn = false;
+        contextTable._showBorder = false;
         contextTable._physical_cellCnt = 0;
         contextTable._logical_cellCnt = 0;
         contextTable._rowCnt = 0;
@@ -323,11 +329,12 @@ export default {
         const tableElement = contextTable._element || this.plugins.table._selectedTable || this.util.getParentElement(tdElement, 'TABLE');
         contextTable._maxWidth = this.util.hasClass(tableElement, 'se-table-size-100') || tableElement.style.width === '100%' || (!tableElement.style.width && !this.util.hasClass(tableElement, 'se-table-size-auto'));
         contextTable._fixedColumn = this.util.hasClass(tableElement, 'se-table-layout-fixed') || tableElement.style.tableLayout === 'fixed';
+        contextTable._showBorder = this.util.hasClass(tableElement, 'se-table-border');
         tablePlugin.setTableStyle.call(this, contextTable._maxWidth ? 'width|column' : 'width');
-        
+
         tablePlugin.setPositionControllerTop.call(this, tableElement);
         tablePlugin.setPositionControllerDiv.call(this, tdElement, tablePlugin._shift);
-        
+
         if (!tablePlugin._shift) this.controllersOn(contextTable.resizeDiv, contextTable.tableController, tablePlugin.init.bind(this), tdElement, 'table');
     },
 
@@ -338,9 +345,9 @@ export default {
     setPositionControllerDiv: function (tdElement, reset) {
         const contextTable = this.context.table;
         const resizeDiv = contextTable.resizeDiv;
-        
+
         this.plugins.table.setCellInfo.call(this, tdElement, reset);
-        
+
         if (contextTable.cellControllerTop) {
             this.setControllerPosition(resizeDiv, contextTable._element, 'top', {left: contextTable.tableController.offsetWidth, top: 0});
         } else {
@@ -409,7 +416,7 @@ export default {
                                 if (arr.rs < 1) {
                                     spanIndex.splice(r, 1);
                                     r--;
-                                }  
+                                }
                             } else if (c === cLen - 1) {
                                 arr.rs -= 1;
                                 arr.row = i + 1;
@@ -435,7 +442,7 @@ export default {
                             row: -1
                         });
                     }
-                    
+
                     colSpan += cs;
                 }
 
@@ -498,7 +505,7 @@ export default {
                 // remove cell
                 if (!option) {
                     const removeCells = [selectedCells[0]];
-                    
+
                     for (let i = 1, len = selectedCells.length, cell; i < len; i++) {
                         cell = selectedCells[i];
                         if (firstRow === cell.parentNode) {
@@ -555,14 +562,14 @@ export default {
         const originRowIndex = contextTable._rowIndex;
         const rowIndex = remove || up ? originRowIndex : originRowIndex + contextTable._current_rowSpan + 1;
         const sign = remove ? -1 : 1;
-        
+
         const rows = contextTable._trElements;
         let cellCnt = contextTable._logical_cellCnt;
 
         for (let i = 0, len = originRowIndex + (remove ? -1 : 0), cell; i <= len; i++) {
             cell = rows[i].cells;
             if (cell.length === 0) return;
-            
+
             for (let c = 0, cLen = cell.length, rs, cs; c < cLen; c++) {
                 rs = cell[c].rowSpan;
                 cs = cell[c].colSpan;
@@ -602,7 +609,7 @@ export default {
                         cell = cells[i];
                         logcalIndex = i + colSpan;
                         colSpan += cell.colSpan - 1;
-    
+
                         if (logcalIndex >= spanCell.index) {
                             i--, colSpan--;
                             colSpan += spanCell.cell.colSpan - 1;
@@ -685,7 +692,7 @@ export default {
                             if (arr.rs < 1) {
                                 spanIndex.splice(r, 1);
                                 r--;
-                            }  
+                            }
                         }
                         applySpan = true;
                     }
@@ -706,7 +713,7 @@ export default {
                                 if (arr.rs < 1) {
                                     spanIndex.splice(r, 1);
                                     r--;
-                                }  
+                                }
                             } else if (lastCell) {
                                 arr.rs -= 1;
                                 arr.row = i + 1;
@@ -730,7 +737,7 @@ export default {
                     if (removeIndex >= insertIndex && removeIndex + cs <= insertIndex + colSpan) {
                         removeCell.push(cell);
                     } else if (removeIndex <= insertIndex + colSpan && removeIndex + cs >= insertIndex) {
-                        cell.colSpan -= util.getOverlapRangeAtIndex(cellIndex, cellIndex + colSpan, removeIndex, removeIndex + cs); 
+                        cell.colSpan -= util.getOverlapRangeAtIndex(cellIndex, cellIndex + colSpan, removeIndex, removeIndex + cs);
                     } else if (rs > 0 && (removeIndex < insertIndex || removeIndex + cs > insertIndex + colSpan)) {
                         removeSpanArr.push({
                             cell: cell,
@@ -843,7 +850,7 @@ export default {
                                     if (arr.rs < 1) {
                                         spanIndex.splice(r, 1);
                                         r--;
-                                    }  
+                                    }
                                 } else if (c === cLen - 1) {
                                     arr.rs -= 1;
                                     arr.row = i + 1;
@@ -870,7 +877,7 @@ export default {
                         }
 
                         if (logcalIndex > index) break;
-                        
+
                         colSpan += cs;
                     }
 
@@ -926,7 +933,7 @@ export default {
                         insertIndex += rs.cs;
                         rs = rowSpanArr.shift();
                     }
-                    
+
                     if (insertIndex >= index || c === cLen - 1) {
                         nextRow.insertBefore(newCell, cell.nextElementSibling);
                         break;
@@ -956,8 +963,8 @@ export default {
                 const cells = currentRow.cells;
 
                 for (let c = 0, cLen = cells.length; c < cLen; c++) {
-                    if (c === physicalIndex) continue;       
-                    cells[c].rowSpan += 1;                    
+                    if (c === physicalIndex) continue;
+                    cells[c].rowSpan += 1;
                 }
 
                 currentRow.parentNode.insertBefore(newRow, currentRow.nextElementSibling);
@@ -976,7 +983,7 @@ export default {
         const ref = tablePlugin._ref;
         const selectedCells = tablePlugin._selectedCells;
         const mergeCell = selectedCells[0];
-        
+
         let emptyRowFirst = null;
         let emptyRowLast = null;
         let cs = (ref.ce - ref.cs) + 1;
@@ -992,7 +999,7 @@ export default {
             for (let c = 0, cLen = ch.length; c < cLen; c++) {
                 if (util.isFormatElement(ch[c]) && util.onlyZeroWidthSpace(ch[c].textContent)) {
                     util.removeItem(ch[c]);
-                }  
+                }
             }
 
             mergeHTML += cell.innerHTML;
@@ -1010,14 +1017,14 @@ export default {
             const rowIndexFirst = util.getArrayIndex(rows, emptyRowFirst);
             const rowIndexLast = util.getArrayIndex(rows, emptyRowLast || emptyRowFirst);
             const removeRows = [];
-    
+
             for (let i = 0, cells; i <= rowIndexLast; i++) {
                 cells = rows[i].cells;
                 if (cells.length === 0) {
                     removeRows.push(rows[i]);
                     continue;
                 }
-    
+
                 for (let c = 0, cLen = cells.length, cell, rs; c < cLen; c++) {
                     cell = cells[c];
                     rs = cell.rowSpan - 1;
@@ -1089,7 +1096,7 @@ export default {
                 this.util.removeClass(tableElement, 'se-table-size-auto');
                 this.util.addClass(tableElement, 'se-table-size-100');
             }
-            
+
             this.util.changeElement(icon, sizeIcon);
             this.util.changeTxt(span, text);
         }
@@ -1104,8 +1111,17 @@ export default {
                 this.util.addClass(tableElement, 'se-table-layout-fixed');
                 this.util.addClass(contextTable.columnFixedButton, 'active');
             }
-            
+
         }
+
+        if (styles.indexOf('border') > -1) {
+            if (contextTable._showBorder) {
+                this.util.addClass(tableElement, 'se-table-border');
+            } else {
+                this.util.removeClass(tableElement, 'se-table-border');
+            }
+        }
+
     },
 
     setActiveButton: function (fixedCell, selectedCell) {
@@ -1158,7 +1174,7 @@ export default {
         }
 
         if (!tablePlugin._fixedCell || !tablePlugin._selectedTable) return;
-        
+
         tablePlugin.setActiveButton.call(this, tablePlugin._fixedCell, tablePlugin._selectedCell);
         tablePlugin.call_controller_tableEdit.call(this, tablePlugin._selectedCell || tablePlugin._fixedCell);
 
@@ -1185,7 +1201,7 @@ export default {
             else tablePlugin._toggleEditor.call(this, false);
         }
 
-        if (!target || target === tablePlugin._selectedCell || tablePlugin._fixedCellName !== target.nodeName || 
+        if (!target || target === tablePlugin._selectedCell || tablePlugin._fixedCellName !== target.nodeName ||
             tablePlugin._selectedTable !== this.util.getParentElement(target, 'TABLE')) {
             return;
         }
@@ -1256,7 +1272,7 @@ export default {
                         ref.re = ref.re !== null && ref.re > i + rs ? ref.re : i + rs;
                         ref._i += 1;
                     }
-                    
+
                     if (ref._i === 2) {
                         findSelectedCell = false;
                         spanIndex = [];
@@ -1345,7 +1361,7 @@ export default {
         }
 
         this.util.addClass(tdElement, 'se-table-selected-cell');
-        
+
         tablePlugin._bindOnSelect = tablePlugin._onCellMultiSelect.bind(this);
         tablePlugin._bindOffSelect = tablePlugin._offCellMultiSelect.bind(this);
 
@@ -1376,7 +1392,7 @@ export default {
         const value = target.getAttribute('data-value');
         const option = target.getAttribute('data-option');
         const tablePlugin = this.plugins.table;
-        
+
         if (typeof tablePlugin._closeSplitMenu === 'function') {
             tablePlugin._closeSplitMenu();
             if (command === 'onsplit') return;
@@ -1409,6 +1425,10 @@ export default {
                 tablePlugin.setTableStyle.call(this, 'width');
                 tablePlugin.setPositionControllerTop.call(this, contextTable._element);
                 tablePlugin.setPositionControllerDiv.call(this, contextTable._tdElement, tablePlugin._shift);
+                break;
+            case 'toggleBorder':
+                contextTable._showBorder = !contextTable._showBorder;
+                tablePlugin.setTableStyle.call(this, 'border');
                 break;
             case 'layout':
                 contextTable._fixedColumn = !contextTable._fixedColumn;
