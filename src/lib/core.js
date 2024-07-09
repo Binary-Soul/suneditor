@@ -19,7 +19,7 @@ import _notice from '../plugins/modules/_notice';
  * core, event, functions
  * @param {Object} context
  * @param {Object} pluginCallButtons
- * @param {Object} plugins 
+ * @param {Object} plugins
  * @param {Object} lang
  * @param {Object} options
  * @param {Object} _responsiveButtons
@@ -452,7 +452,7 @@ export default function (context, pluginCallButtons, plugins, lang, options, _re
         commandMap: {},
 
         /**
-         * @description CSS properties related to style tags 
+         * @description CSS properties related to style tags
          * @private
          */
         _commandMapStyles: {
@@ -899,7 +899,7 @@ export default function (context, pluginCallButtons, plugins, lang, options, _re
          * @param {String} position Type of position ("top" | "bottom")
          * When using the "top" position, there should not be an arrow on the controller.
          * When using the "bottom" position there should be an arrow on the controller.
-         * @param {Object} addOffset These are the left and top values that need to be added specially. 
+         * @param {Object} addOffset These are the left and top values that need to be added specially.
          * This argument is required. - {left: 0, top: 0}
          * Please enter the value based on ltr mode.
          * Calculated automatically in rtl mode.
@@ -3086,7 +3086,7 @@ export default function (context, pluginCallButtons, plugins, lang, options, _re
                     start.offset = end.offset = 1;
                 }
                 this._setCommonListStyle(newRange.ancestor, null);
-            } else { // multi line 
+            } else { // multi line
                 let appliedCommonList = false;
                 if (endLength > 0 && this._resetCommonListCell(lineNodes[endLength], styleArray)) appliedCommonList = true;
                 if (this._resetCommonListCell(lineNodes[0], styleArray)) appliedCommonList = true;
@@ -5242,7 +5242,7 @@ export default function (context, pluginCallButtons, plugins, lang, options, _re
 
         /**
          * @description Removes attribute values such as style and converts tags that do not conform to the "html5" standard.
-         * @param {String} text 
+         * @param {String} text
          * @returns {String} HTML string
          * @private
          */
@@ -6242,7 +6242,7 @@ export default function (context, pluginCallButtons, plugins, lang, options, _re
                     commonCon.parentNode.insertBefore(format, commonCon);
                     format.appendChild(commonCon);
                 }
-                
+
                 if (util.isBreak(format.nextSibling)) util.removeItem(format.nextSibling);
                 if (util.isBreak(format.previousSibling)) util.removeItem(format.previousSibling);
                 if (util.isBreak(focusNode)) {
@@ -6558,10 +6558,10 @@ export default function (context, pluginCallButtons, plugins, lang, options, _re
                 useCapture: useCapture
             };
         },
-    
+
         removeGlobalEvent(type, listener, useCapture) {
             if (!type) return;
-    
+
             if (typeof type === 'object') {
                 listener = type.listener;
                 useCapture = type.useCapture;
@@ -7575,6 +7575,20 @@ export default function (context, pluginCallButtons, plugins, lang, options, _re
                         if (range.collapsed && (formatStartEdge || formatEndEdge)) {
                             event._enterPrevent(e);
                             const focusBR = util.createElement('BR');
+
+                            if (util.isWysiwygDiv(formatEl)) {
+                                /**
+                                 * Si no hacemos este break el código se sigue ejecutando y al llegar a la línea
+                                 * donde se hace insertBefore:
+                                 * formatEl.parentNode.insertBefore(newFormat, formatStartEdge && !formatEndEdge ? formatEl : formatEl.nextElementSibling);
+                                 * se rompe porque como el newFormat que se crea más abajo es una copia del formatEl, y el formatEl es el
+                                 * contenedor wysiwyg, entonces inserta otro contener wysiwyg y es como si tenemos 2 instancias del editor.
+                                 */
+                                formatEl.appendChild(focusBR);
+                                core.setRange(formatEl, 1, formatEl, 1);
+                                break;
+                            }
+
                             const newFormat = util.createElement(formatEl.nodeName);
                             util.copyTagAttributes(newFormat, formatEl, options.lineAttrReset);
 
@@ -7599,6 +7613,19 @@ export default function (context, pluginCallButtons, plugins, lang, options, _re
 
                         if (formatEl) {
                             e.stopPropagation();
+
+                            if (util.isWysiwygDiv(formatEl)) {
+                                /**
+                                 * Si no hacemos este break el código se sigue ejecutando y al llegar a la línea
+                                 * donde se hace copyAttributes:
+                                 * util.copyTagAttributes(newEl, formatEl, options.lineAttrReset);
+                                 * se rompe porque formatEl porque elimina atributos
+                                 * del contenedor wysiwyg.
+                                 *
+                                 * Sin embargo, si hacemos el break en este punto ya inserta el enter en el lugar correspondiente
+                                 */
+                                break;
+                            }
 
                             let newEl;
                             let offset = 0;
@@ -8804,7 +8831,7 @@ export default function (context, pluginCallButtons, plugins, lang, options, _re
         /**
          * @description Called after the "setToolbarButtons" invocation.
          * Can be used to tweak buttons properties (useful for custom buttons)
-         * @param {Array} buttonList Button list 
+         * @param {Array} buttonList Button list
          * @param {Object} core Core object
          */
         onSetToolbarButtons: null,
@@ -8812,7 +8839,7 @@ export default function (context, pluginCallButtons, plugins, lang, options, _re
         /**
          * @description Reset the buttons on the toolbar. (Editor is not reloaded)
          * You cannot set a new plugin for the button.
-         * @param {Array} buttonList Button list 
+         * @param {Array} buttonList Button list
          */
         setToolbarButtons: function (buttonList) {
             core.submenuOff();

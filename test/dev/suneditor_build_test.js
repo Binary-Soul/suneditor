@@ -284,7 +284,7 @@ const complexEditor = [
 //     value: '',
 //     resizingBar: false,
 //     showPathLabel: false,
-//     display: "inline",  
+//     display: "inline",
 //     tabDisable: false,
 //     placeholder: "Enter the question image here",
 //     buttonList: [["table","removeFormat"]],
@@ -311,7 +311,7 @@ const complexEditor = [
 // //     if (maxCharCount > 0) {
 // //         let over = false;
 // //         const count = wysiwyg.textContent.length + emptyListCount; // add empty list
-        
+
 // //         if (count > maxCharCount) {
 // //             this._editorRange();
 // //             const range = this.getRange();
@@ -357,7 +357,7 @@ const complexEditor = [
 // //     imageWidth: 150,
 // //     placeholder: 'Start typing something...'
 // //     // fullPage: true,
-    
+
 // // });
 
 // window.sun_destroy1 = function () {
@@ -521,7 +521,7 @@ const complexEditor = [
 //     //     autoplay: true
 //     // },
 //     // videoIframeAttrs: {
-//     //     style: "border: 2px solid red;" 
+//     //     style: "border: 2px solid red;"
 //     // },
 //     // height: 'auto',
 //     iframeCSSFileName: '.+',
@@ -726,7 +726,7 @@ const complexEditor = [
 
 // // ss.onImageUploadBefore = function (files, info, core, uploadHandler) {
 // //     // ResizeImage(files, uploadHandler)
-    
+
 // //     console.log("infoinfoinfo", info);
 // //     info.alt = "test-123";
 // //     const response = { // Same format as "videoUploadUrl" response
@@ -777,9 +777,9 @@ const complexEditor = [
 //     // ss.setOptions({
 //     //     resizingBarContainer: null,
 //     // })
-    
+
 //     // ss.core.setDir(!window.aaa ? 'rtl' : 'ltr');
-    
+
 //     // window.aaa = !window.aaa
 //     // ss.core.setDir("rtl")
 //     // ss.noticeOpen('test notice');
@@ -956,7 +956,7 @@ plugins.template.pickup = function (e) {
         this.submenuOff();
         throw Error('[SUNEDITOR.template.fail] cause : "templates[i].html not found"');
     }
-        
+
     this.submenuOff();
 }
 
@@ -970,7 +970,7 @@ let s2 = window.s2 = suneditor.create(document.getElementById('editor2'), {
 //   <li>Pasting from Microsoft Word and Excel.</li>
 //   <li>Custom table selection, merge and split.</li>
 //   <li>Media embed, images upload.</li>
-//   <li>Can use CodeMirror, KaTeX.    
+//   <li>Can use CodeMirror, KaTeX.
 //     <ul>
 //       <li>And.. many other features :)</li>
 //       <li>And.. many other features :)</li>
@@ -1035,10 +1035,11 @@ let s2 = window.s2 = suneditor.create(document.getElementById('editor2'), {
     // addTagsWhitelist: "fld|sort|sortType|lst|lstfld|header|section",
     lineAttrReset: 'class',
     imageAccept: '*/*',
-    value: `<figure>
+    /* value: `<figure>
     <img src="https://blog.kakaocdn.net/dn/0QCnX/btqU7cMuFOZ/uVPVj1aIBNqINLQZGkuwa0/img.png" alt="">
     <figcaption>Home Edge Logo</figcaption>
-</figure>`,
+</figure>`, */
+    value: `<table class="se-table-border"><tbody><tr><td><div>1</div></td><td><div>2</div></td></tr><tr><td><div>3</div></td><td><div>4</div></td></tr></tbody></table>`,
     // attributesWhitelist: {
     //     all: 'style|class',
     // },
@@ -1083,7 +1084,8 @@ window.sun_setOptions2 = () => {
 // }
 
  s2.onChange = (content) => {
-    console.log(content)
+    console.log(content);
+
  }
 
 s2.onClick = (event, core) => {
@@ -1112,7 +1114,7 @@ s2.onResizeEditor = (height, prevHeight, core) => {
 //     })
 // }
 
-// plugins.mention.getItems = async term => 
+// plugins.mention.getItems = async term =>
 //   [
 //     {name: 'auser1'},
 //     {name: 'buser2'},
@@ -1232,7 +1234,7 @@ s2.onResizeEditor = (height, prevHeight, core) => {
 
 //     for (let i = 0, video; i < videoList.length; i++) {
 //         video = videoList[i];
-            
+
 //         list += '<li>' +
 //                     '<button title="delete" onclick="selectVideo(\'delete\',' + video.index + ')">X</button>' +
 //                     '<a href="javascript:void(0)" onclick="selectVideo(\'select\',' + video.index + ')">' + video.src + '</a>' +
@@ -1271,7 +1273,7 @@ s2.onResizeEditor = (height, prevHeight, core) => {
 
 // window.deleteCheckedImages = function () {
 //     const iamgesInfo = s2.getImagesInfo();
-    
+
 //     for (let i = 0; i < iamgesInfo.length; i++) {
 //         if (selectedImages.indexOf(iamgesInfo[i].index) > -1) {
 //             iamgesInfo[i].delete();
@@ -1292,7 +1294,7 @@ s2.onResizeEditor = (height, prevHeight, core) => {
 //     for (let i = 0, image, fixSize; i < imageList.length; i++) {
 //         image = imageList[i];
 //         fixSize = (image.size / 1000).toFixed(1) * 1
-            
+
 //         list += '<li id="img_' + image.index + '">' +
 //                     '<div onclick="checkImage(' + image.index + ')">' +
 //                         '<div><img src="' + image.src + '"></div>' +
@@ -1300,7 +1302,7 @@ s2.onResizeEditor = (height, prevHeight, core) => {
 //                     '<a href="javascript:void(0)" onclick="setImage(\'select\',' + image.index + ')" class="image-size">' + fixSize + 'KB</a>' +
 //                     '<div class="image-check"><svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"></path></svg></div>' +
 //                 '</li>';
-        
+
 //         size += fixSize;
 //     }
 
@@ -1323,7 +1325,7 @@ s2.onResizeEditor = (height, prevHeight, core) => {
 // //             const image = s2.getImagesInfo()[findIndex(s2.getImagesInfo(), index)]
 // //             imageList.push(image)
 // //         } else { // update
-            
+
 // //         }
 // //     }
 
