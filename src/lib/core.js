@@ -915,6 +915,26 @@ export default function (context, pluginCallButtons, plugins, lang, options, _re
             const topMargin = position === 'top' ? -(controller.offsetHeight + 2) : (referEl.offsetHeight + 12);
             controller.style.top = (offset.top + topMargin + addOffset.top) + 'px';
 
+            /**
+             * Custom code to avoid displaying the controller outside the viewport
+             */
+            // Get the viewport height
+            const viewportHeight = window.innerHeight;
+            // Get the absolute position of the element
+            const positionInfo = controller.getBoundingClientRect();
+            // Calculate the bottom position of the element
+            const elementBottom = positionInfo.top + positionInfo.height;
+            // Check if the element overflows at the bottom
+            if (elementBottom > viewportHeight) {
+                // Subtract the height of the controller so it appears above the referEl
+                controller.style.top = (offset.top + topMargin + addOffset.top - positionInfo.height - 12) + 'px'; // Adjust by subtracting the height of the controller and an additional margin
+            }
+            // Check if the element overflows at the top
+            if (positionInfo.top < 0) {
+                // Adjust the position of the controller to appear at the top of the referEl
+                controller.style.top = (offset.top + 12) + 'px';
+            }
+
             const l = offset.left - context.element.wysiwygFrame.scrollLeft + addOffset.left;
             const controllerW = controller.offsetWidth;
             const referElW = referEl.offsetWidth;
