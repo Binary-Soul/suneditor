@@ -6648,6 +6648,10 @@ export default function (context, pluginCallButtons, plugins, lang, options, _re
         onClick_wysiwyg: function (e) {
             const targetElement = e.target;
 
+            if (targetElement.tagName === 'TD') {
+                return;
+            }
+
             if (core.isReadOnly) {
                 e.preventDefault();
                 if (util.isAnchor(targetElement)){
